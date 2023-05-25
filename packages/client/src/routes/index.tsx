@@ -7,8 +7,9 @@ import {
 } from '../pages';
 import { DashboardLayout } from '../ui/layouts';
 import { NotFound } from '../pages/404';
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { Spin } from 'antd';
+import useStore from '../store';
 
 const router = createBrowserRouter([
   {
@@ -44,6 +45,17 @@ const router = createBrowserRouter([
 ]);
 
 const AppRouterProvider = () => {
+  const setSocket = useStore((state) => state.setSocket);
+  const socket = useStore((state) => state.socket);
+  useEffect(() => {
+    setSocket();
+    console.log("socket", socket)
+    if (socket) {
+      socket.on('scraping-started', () => {
+        console.log("Scraping")
+      })
+    }
+  }, [setSocket])
   return <RouterProvider router={router} />;
 };
 

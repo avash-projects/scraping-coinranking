@@ -3,13 +3,24 @@ import { Injectable } from '@nestjs/common';
 
 import { APP_CONSTS } from '@constants';
 import { CheerioService } from '../cheerio/cheerio.service';
-
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { SocketGateway } from '../socket/socket.gateway';
 @Injectable()
 export class ScraperService {
   constructor(
     private readonly httpService: HttpService,
     private readonly cheerioService: CheerioService,
+    private readonly socketGateway: SocketGateway,
   ) {}
+
+  @Cron(CronExpression.EVERY_10_SECONDS)
+  scrapingCron() {
+    console.log('called every 10 secs');
+    this.socketGateway.startScraping();
+    setTimeout(() => {
+      this.socketGateway.endScraping();
+    }, 5000);
+  }
 
   async scrape() {
     let page = 1;

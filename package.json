@@ -7,8 +7,8 @@
   "author": "avash <avash700@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "dev:server": "cd packages/server && yarn run start:dev",
-    "dev:client": "cd packages/server && yarn run dev",
+    "dev:server": "yarn workspace server run start:dev",
+    "dev:client": "yarn workspace client run dev",
     "dev:all": "yarn run dev:server && yarn run dev:client"
   },
   "workspaces": [

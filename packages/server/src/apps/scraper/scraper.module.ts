@@ -3,9 +3,10 @@ import { ScraperService } from './scraper.service';
 import { HttpModule } from '@nestjs/axios';
 import { ScraperController } from './scraper.controller';
 import { CheerioModule } from '../cheerio/cheerio.module';
+import { SocketModule } from '../socket/socket.module';
 
 @Module({
-  imports: [HttpModule, CheerioModule],
+  imports: [HttpModule, CheerioModule, SocketModule],
   providers: [ScraperService],
   controllers: [ScraperController],
 })
