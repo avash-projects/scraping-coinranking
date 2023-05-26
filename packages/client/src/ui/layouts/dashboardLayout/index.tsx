@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -8,12 +8,13 @@ import { Layout, Menu, Button, theme, Row } from 'antd';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import SiderButton from '../../components/SiderButton';
 import { HomeOutlined } from '@ant-design/icons';
+import useStore from '../../../store';
 
 const { Header, Sider, Content } = Layout;
 
 const DashboardLayout = () => {
+  const socket = useStore((state) => state.socket)
   const [collapsed, setCollapsed] = useState(false);
-
   const {
     token: { colorBgContainer },
   } = theme.useToken();
@@ -22,6 +23,23 @@ const DashboardLayout = () => {
     localStorage.removeItem('jwt_token');
   };
 
+
+
+  useEffect(() => {
+    const test = () => {
+      console.log(socket)
+      console.log("Scraping")
+    }
+    if (socket) {
+      socket.on('scraping-started', test)
+    }
+  }, [])
+  //cleanup
+  useEffect(() => {
+    return () => {
+      socket?.disconnect();
+    };
+  }, [])
   return (
     <Layout hasSider={true}>
       <Sider
