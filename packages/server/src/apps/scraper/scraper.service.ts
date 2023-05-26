@@ -1,50 +1,50 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 
-import { APP_CONSTS } from '@constants';
 import { CheerioService } from '../cheerio/cheerio.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { SocketGateway } from '../socket/socket.gateway';
+import { Coin } from '../../schemas/coin.schema';
+import { CoinService } from '../coin/coin.service';
 @Injectable()
 export class ScraperService {
   constructor(
     private readonly httpService: HttpService,
     private readonly cheerioService: CheerioService,
     private readonly socketGateway: SocketGateway,
+    private readonly coinService: CoinService,
   ) {}
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
-  scrapingCron() {
-    console.log('called every 10 secs');
+  private scrapeConfig = parseInt(process.env.PAGES_TO_SCRAPE);
+  private scrapeSite = process.env.SCRAPE_SITE_URL;
+
+  @Cron(CronExpression.EVERY_30_MINUTES)
+  async scrapingCron() {
     this.socketGateway.startScraping();
-    setTimeout(() => {
-      this.socketGateway.endScraping();
-    }, 5000);
+    const { scrapedData } = await this.scrape();
+    await this.coinService.deleteAll();
+    await this.coinService.bulkInsert(scrapedData);
+    this.socketGateway.endScraping();
   }
 
-  async scrape() {
+  async scrape(): Promise<{
+    lastPage: number;
+    scrapedPages: number;
+    scrapedData: Coin[];
+  }> {
     let page = 1;
-    const { data } = await this.httpService.axiosRef.get(
-      `${APP_CONSTS.SITE_TO_SCRAPE}?page=${page}`,
-    );
+    const { data } = await this.httpService.axiosRef.get(`${this.scrapeSite}`);
     const pageData = this.cheerioService.init(data);
-    // const lastPage: number = this.cheerioService.scrapeLastPageNumber(pageData);
-    const lastPage = 100;
-
-    // const pagesToScrape =
-    //   lastPage <= parseInt(APP_CONSTS.PAGES_TO_SCRAPE)
-    //     ? lastPage
-    //     : APP_CONSTS.PAGES_TO_SCRAPE;
-    const allData = [];
+    const lastPage: number = this.cheerioService.scrapeLastPageNumber(pageData);
+    const pagesToScrape =
+      lastPage < this.scrapeConfig ? lastPage : this.scrapeConfig;
+    const allData: Coin[] = [];
     const promises = [];
-
-    while (page !== lastPage + 1) {
-      page++;
+    while (page !== pagesToScrape + 1) {
       promises.push(
-        this.httpService.axiosRef.get(
-          `${APP_CONSTS.SITE_TO_SCRAPE}?page=${page}`,
-        ),
+        this.httpService.axiosRef.get(`${this.scrapeSite}?page=${page}`),
       );
+      page++;
     }
     const responses = await Promise.all(promises);
 
@@ -54,17 +54,6 @@ export class ScraperService {
       allData.push(...coinData);
     }
 
-    // while (page !== lastPage + 1) {
-    //   console.log(page);
-    //   const { data } = await this.httpService.axiosRef.get(
-    //     `${APP_CONSTS.SITE_TO_SCRAPE}?page=${page}`,
-    //   );
-    //   const cheerioData = this.cheerioService.init(data);
-    //   const coinData = this.cheerioService.scrapeCoinTable(cheerioData);
-    //   allData.push(...coinData);
-    //   page++;
-    // }
-
-    return { lastPage, allData };
+    return { lastPage, scrapedPages: pagesToScrape, scrapedData: allData };
   }
 }

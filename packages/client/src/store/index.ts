@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { Socket, io } from "socket.io-client";
+import { APP_CONSTANTS } from "../constants";
 
 interface Store {
   socket: Socket | null;
@@ -8,7 +9,7 @@ interface Store {
 }
 
 const useStore = create<Store>((set) => ({
-  socket: io("ws://localhost:3030", {
+  socket: io(APP_CONSTANTS.WS_URL, {
     autoConnect: false,
   }),
   isScraping: false,

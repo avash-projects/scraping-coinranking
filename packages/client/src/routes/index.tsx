@@ -5,7 +5,7 @@ import {
   DashboardHome,
   Watchlist,
 } from '../pages';
-import { DashboardLayout } from '../ui/layouts';
+import { DashboardLayout } from '../layouts';
 import { NotFound } from '../pages/404';
 import { Suspense } from 'react';
 import { Spin } from 'antd';

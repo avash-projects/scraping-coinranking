@@ -1,16 +1,20 @@
 import { useEffect, useState } from 'react';
 import {
+  LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
 } from '@ant-design/icons';
 import { Layout, Menu, Button, theme, Row } from 'antd';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import useStore from '../../../store';
+import useStore from '../../store';
 import menuItems from './menu';
+import ScrapingStatus from './components/ScrapingStatus';
+import { useQueryClient } from '@tanstack/react-query';
 
 const { Header, Sider, Content } = Layout;
 
 const DashboardLayout = () => {
+  const queryClient = useQueryClient();
   const location = useLocation();
   const currentPath = location.pathname.split('/')[1] ? location.pathname.split('/')[1] : 'home';
 
@@ -20,29 +24,37 @@ const DashboardLayout = () => {
   } = theme.useToken();
 
   const socket = useStore((state) => state.socket);
+  const isScraping = useStore((state) => state.isScraping);
+  const updateScrapingStatus = useStore((state) => state.updateScrapingStatus);
 
   const logoutUser = () => {
     localStorage.removeItem('jwt_token');
   };
 
-  // useEffect(() => {
-  //   function startScrapingEvent() {
-  //     console.log(socket)
-  //     console.log("Scraping")
-  //   }
-  //   socket?.on('scraping-started', startScrapingEvent);
+  useEffect(() => {
+    function startScrapingEvent() {
+      updateScrapingStatus(true);
+    }
+    function endScrapingEvent() {
+      updateScrapingStatus(false);
+      queryClient.invalidateQueries({ queryKey: ['todos'] })
+    }
 
-  //   return () => {
-  //     socket?.off('scraping-started', startScrapingEvent);
-  //   }
-  // }, [socket])
-  // //cleanup
-  // useEffect(() => {
-  //   socket?.connect();
-  //   return () => {
-  //     socket?.disconnect();
-  //   };
-  // }, [socket])
+    socket?.on('scraping-started', startScrapingEvent);
+    socket?.on('scraping-ended', endScrapingEvent);
+
+    return () => {
+      socket?.off('scraping-started', startScrapingEvent);
+      socket?.off('scraping-ended', endScrapingEvent);
+    }
+  }, [socket, updateScrapingStatus, queryClient]);
+  //cleanup
+  useEffect(() => {
+    socket?.connect();
+    return () => {
+      socket?.disconnect();
+    };
+  }, [socket])
 
   return (
     <Layout hasSider={true}>
@@ -83,7 +95,7 @@ const DashboardLayout = () => {
       </Sider>
       <Layout>
         <Header style={{ padding: 0, background: colorBgContainer }}>
-          <Row justify="space-between">
+          <Row justify="space-between" align="middle">
             <Button
               type="text"
               icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
@@ -94,15 +106,17 @@ const DashboardLayout = () => {
                 height: 64,
               }}
             />
-            <Link to="/login">
-              <Button
-                onClick={logoutUser}
-                type="primary"
-                style={{ marginRight: '1rem' }}
-              >
-                Logout
-              </Button>
-            </Link>
+            <Row align="middle">
+              {
+                isScraping && <ScrapingStatus sx={{ marginRight: '4rem' }} />
+              }
+              <Link to="/login">
+                <LogoutOutlined
+                  onClick={logoutUser}
+                  style={{ marginRight: '2rem', fontSize: '20px' }}
+                />
+              </Link>
+            </Row>
           </Row>
         </Header>
         <Content
