@@ -1,9 +1,9 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
 import { Login } from '../pages/auth/login';
 import { AuthWrapper, PublicWrapper } from './wrapper';
 import {
   DashboardHome,
-  Users,
+  Watchlist,
 } from '../pages';
 import { DashboardLayout } from '../ui/layouts';
 import { NotFound } from '../pages/404';
@@ -20,7 +20,11 @@ const router = createBrowserRouter([
     element: <AuthWrapper component={<DashboardLayout />} />,
     children: [
       {
+        element: <Navigate to='/home' />
+      },
+      {
         index: true,
+        path: 'home',
         element: (
           <Suspense fallback={<Spin />}>
             <DashboardHome />
@@ -28,10 +32,10 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: 'users',
+        path: 'watchlist',
         element: (
           <Suspense fallback={<Spin />}>
-            <Users />
+            <Watchlist />
           </Suspense>
         ),
       },

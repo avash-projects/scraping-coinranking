@@ -1,8 +1,8 @@
 import React from 'react';
 const DashboardHome = React.lazy(() => import('./dashboard/home'));
-const Users = React.lazy(() => import('./dashboard/users'));
+const Watchlist = React.lazy(() => import('./dashboard/watchlist'));
 
 export {
   DashboardHome,
-  Users
+  Watchlist
 };

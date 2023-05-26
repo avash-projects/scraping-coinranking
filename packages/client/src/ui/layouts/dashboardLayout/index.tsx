@@ -2,44 +2,48 @@ import { useEffect, useState } from 'react';
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  UserOutlined,
 } from '@ant-design/icons';
 import { Layout, Menu, Button, theme, Row } from 'antd';
-import { Link, NavLink, Outlet } from 'react-router-dom';
-import SiderButton from '../../components/SiderButton';
-import { HomeOutlined } from '@ant-design/icons';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import useStore from '../../../store';
+import menuItems from './menu';
 
 const { Header, Sider, Content } = Layout;
 
 const DashboardLayout = () => {
-  const socket = useStore((state) => state.socket)
+  const location = useLocation();
+  const currentPath = location.pathname.split('/')[1] ? location.pathname.split('/')[1] : 'home';
+
   const [collapsed, setCollapsed] = useState(false);
   const {
     token: { colorBgContainer },
   } = theme.useToken();
 
+  const socket = useStore((state) => state.socket);
+
   const logoutUser = () => {
     localStorage.removeItem('jwt_token');
   };
 
+  // useEffect(() => {
+  //   function startScrapingEvent() {
+  //     console.log(socket)
+  //     console.log("Scraping")
+  //   }
+  //   socket?.on('scraping-started', startScrapingEvent);
 
+  //   return () => {
+  //     socket?.off('scraping-started', startScrapingEvent);
+  //   }
+  // }, [socket])
+  // //cleanup
+  // useEffect(() => {
+  //   socket?.connect();
+  //   return () => {
+  //     socket?.disconnect();
+  //   };
+  // }, [socket])
 
-  useEffect(() => {
-    const test = () => {
-      console.log(socket)
-      console.log("Scraping")
-    }
-    if (socket) {
-      socket.on('scraping-started', test)
-    }
-  }, [])
-  //cleanup
-  useEffect(() => {
-    return () => {
-      socket?.disconnect();
-    };
-  }, [])
   return (
     <Layout hasSider={true}>
       <Sider
@@ -69,32 +73,13 @@ const DashboardLayout = () => {
             }}
           />
         </div>
-        <Menu theme="dark" mode="inline">
-          <Menu.Item key={'1'} style={{ backgroundColor: 'transparent' }}>
-            <NavLink to="/">
-              {({ isActive, isPending }) => (
-                <SiderButton
-                  isActive={isActive}
-                  isPending={isPending}
-                  text="Dashboard"
-                  icon={<HomeOutlined />}
-                />
-              )}
-            </NavLink>
-          </Menu.Item>
-          <Menu.Item key={'2'} style={{ backgroundColor: 'transparent' }}>
-            <NavLink to="/users">
-              {({ isActive, isPending }) => (
-                <SiderButton
-                  isActive={isActive}
-                  isPending={isPending}
-                  text="Users"
-                  icon={<UserOutlined />}
-                />
-              )}
-            </NavLink>
-          </Menu.Item>
-        </Menu>
+        <Menu
+          defaultSelectedKeys={[currentPath]}
+          items={menuItems}
+          theme="dark"
+          mode="inline"
+          style={{ backgroundColor: 'transparent' }}
+        />
       </Sider>
       <Layout>
         <Header style={{ padding: 0, background: colorBgContainer }}>
@@ -130,7 +115,7 @@ const DashboardLayout = () => {
           <Outlet />
         </Content>
       </Layout>
-    </Layout>
+    </Layout >
   );
 };
 

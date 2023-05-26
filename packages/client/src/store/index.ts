@@ -8,7 +8,9 @@ interface Store {
 }
 
 const useStore = create<Store>((set) => ({
-  socket: io("ws://localhost:3030"),
+  socket: io("ws://localhost:3030", {
+    autoConnect: false,
+  }),
   isScraping: false,
   updateScrapingStatus: (value: boolean) => set(() => ({ isScraping: value })),
 }));
