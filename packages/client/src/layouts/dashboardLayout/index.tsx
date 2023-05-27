@@ -10,15 +10,21 @@ import useStore from '../../store';
 import menuItems from './menu';
 import ScrapingStatus from './components/ScrapingStatus';
 import { useQueryClient } from '@tanstack/react-query';
+import DateInfo from './components/DateInfo';
 
 const { Header, Sider, Content } = Layout;
+
+interface ScrapeHistory {
+  date: string;
+  totalDocuments: number;
+}
 
 const DashboardLayout = () => {
   const queryClient = useQueryClient();
   const location = useLocation();
   const currentPath = location.pathname.split('/')[1] ? location.pathname.split('/')[1] : 'home';
-
   const [collapsed, setCollapsed] = useState(false);
+  const [scrapeHistory, setScrapeHistory] = useState<ScrapeHistory | null>(null);
   const {
     token: { colorBgContainer },
   } = theme.useToken();
@@ -35,9 +41,11 @@ const DashboardLayout = () => {
     function startScrapingEvent() {
       updateScrapingStatus(true);
     }
-    function endScrapingEvent() {
+    function endScrapingEvent(payload: ScrapeHistory) {
+      setScrapeHistory(payload)
       updateScrapingStatus(false);
-      queryClient.invalidateQueries({ queryKey: ['todos'] })
+      queryClient.invalidateQueries({ queryKey: ['coins'] })
+      queryClient.invalidateQueries({ queryKey: ['history'] })
     }
 
     socket?.on('scraping-started', startScrapingEvent);
@@ -109,6 +117,13 @@ const DashboardLayout = () => {
             <Row align="middle">
               {
                 isScraping && <ScrapingStatus sx={{ marginRight: '4rem' }} />
+              }
+              {
+                !isScraping && scrapeHistory && <DateInfo
+                  sx={{ marginRight: '4rem', display: 'flex', flexDirection: 'column'  }}
+                  date={scrapeHistory?.date}
+                  totalDocs={scrapeHistory?.totalDocuments}
+                />
               }
               <Link to="/login">
                 <LogoutOutlined

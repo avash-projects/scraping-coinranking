@@ -10,5 +10,6 @@ import { CoinModule } from '../coin/coin.module';
   imports: [HttpModule, CheerioModule, SocketModule, CoinModule],
   providers: [ScraperService],
   controllers: [ScraperController],
+  exports: [ScraperService]
 })
 export class ScraperModule {}

@@ -1,21 +1,6 @@
-interface Coin {
-    rank: string;
-    name: string;
-    symbol: string;
-    price: string;
-    marketCap: string;
-    change: string;
-    imageUrl: string;
-}
+import { CoinColumn } from "../../../../types";
 
-interface Column {
-    title: string;
-    dataIndex: string;
-    key: string;
-    render?: (text: string, record: Coin) => React.ReactNode;
-}
-
-export const coinTableColumns: Column[] = [
+export const CoinTableColumns: CoinColumn[] = [
     {
         title: 'Rank',
         dataIndex: 'rank',

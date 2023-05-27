@@ -1,20 +1,22 @@
 import { Table } from "antd"
-import { coinTableColumns } from "./CoinTableColumns"
+import { CoinTableColumns } from "./CoinTableColumns"
 import { useFetchCoins } from "../hooks/useFetchCoins";
 
 const CoinsTable = () => {
-    const { coins, isLoadingCoins } = useFetchCoins();
+    const { coins, isLoadingCoins } = useFetchCoins({
+        enabled: true
+    });
     return (
         <>
             <Table
                 pagination={{
-                    pageSize: 9,
+                    pageSize: 10,
                 }}
                 size="middle"
                 style={{ width: '100%' }}
                 loading={isLoadingCoins}
                 dataSource={coins}
-                columns={coinTableColumns}
+                columns={CoinTableColumns}
             />
         </>
     )

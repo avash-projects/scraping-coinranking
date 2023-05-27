@@ -13,18 +13,18 @@ export class ScraperService {
     private readonly cheerioService: CheerioService,
     private readonly socketGateway: SocketGateway,
     private readonly coinService: CoinService,
-  ) {}
+  ) { }
 
   private scrapeConfig = parseInt(process.env.PAGES_TO_SCRAPE);
   private scrapeSite = process.env.SCRAPE_SITE_URL;
 
-  @Cron(CronExpression.EVERY_30_MINUTES)
+  @Cron('0 */1 * * * *')
   async scrapingCron() {
     this.socketGateway.startScraping();
     const { scrapedData } = await this.scrape();
     await this.coinService.deleteAll();
     await this.coinService.bulkInsert(scrapedData);
-    this.socketGateway.endScraping();
+    this.socketGateway.endScraping(scrapedData.length);
   }
 
   async scrape(): Promise<{

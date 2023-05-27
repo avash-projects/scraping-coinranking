@@ -2,9 +2,13 @@ import { Row, Typography } from "antd";
 import CoinsTable from "./components/CoinsTable";
 const DashboardHome = () => {
   return (
-    <div>
+    <div
+     style={{
+      height: '70vh'
+     }}
+    >
       <Row justify="space-between" align="middle">
-        <Typography.Title level={2}>🤑🚀🌙</Typography.Title>
+        <Typography.Title level={4}>🤑🚀🌙</Typography.Title>
       </Row>
       <Row>
         <CoinsTable />
