@@ -6,24 +6,25 @@ import { useWatchlistMutation } from '../hooks/useWatchlistMutation';
 interface DrawerProps {
   isOpen: boolean;
   handleOpen: (val: boolean) => void;
+  watchlist: Watchlist[];
 }
 
 const WatchlistDrawer = (
   props: DrawerProps
 ) => {
-  const { isOpen, handleOpen } = props
+  const { isOpen, handleOpen, watchlist } = props
   const [form] = Form.useForm();
   const { coins, isLoadingCoins } = useFetchCoins({
     enabled: isOpen
   });
   const watchlistMutation = useWatchlistMutation();
-
+  const selectOptions = coins?.filter(({ symbol: d1 }: Watchlist) => !watchlist.some(({ symbol: d2 }) => d1 === d2));
   const validatePositiveNumber = (_: any, value: number, callback: (error?: string) => void) => {
     const numberValue = Number(value);
     if (isNaN(numberValue) || numberValue < 0) {
-      return callback('Value cannot be smaller than zero');
+      return new Promise((_, reject) => reject('Value cannot be smaller than zero'));
     }
-    callback();
+    return new Promise((resolve) => resolve('Pass'))
   };
 
   const handleFinish = (data: Watchlist) => {
@@ -58,7 +59,7 @@ const WatchlistDrawer = (
               showSearch
               placeholder="Select a coin"
             >
-              {coins?.map((coin: Coin) => (
+              {selectOptions?.map((coin: Coin) => (
                 <Select.Option key={coin.symbol} value={coin.symbol}>
                   {coin.symbol}
                 </Select.Option>

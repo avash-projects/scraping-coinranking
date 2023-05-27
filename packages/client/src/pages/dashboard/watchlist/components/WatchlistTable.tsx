@@ -1,14 +1,16 @@
 import { Table } from "antd"
-import { useFetchWatchlist } from "../hooks/useFetchWatchlist";
 import { Watchlist } from "../../../../types";
 import { useWatchlistDeletion } from "../hooks/useWatchlistDeletion";
 import getWatchlistColumns from "./WatchlistColumns";
 
-const WatchlistTable = () => {
+interface WatchlistProps {
+    data: Watchlist[],
+    isLoading: boolean
+}
+
+const WatchlistTable = ({ data, isLoading }: WatchlistProps) => {
     const deleteMutation = useWatchlistDeletion();
-    const { watchlist, isLoadingWatchlist } = useFetchWatchlist({
-        enabled: true
-    });
+
     const handleDelete = (record: Watchlist) => {
         deleteMutation.mutate(record?.symbol);
     }
@@ -21,8 +23,8 @@ const WatchlistTable = () => {
                 }}
                 size="middle"
                 style={{ width: '100%' }}
-                loading={isLoadingWatchlist}
-                dataSource={watchlist}
+                loading={isLoading}
+                dataSource={data}
                 columns={watchlistColumns}
             />
         </>
