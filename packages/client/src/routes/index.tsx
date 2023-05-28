@@ -4,6 +4,7 @@ import { AuthWrapper, PublicWrapper } from './wrapper';
 import {
   DashboardHome,
   Watchlist,
+  AllNotification
 } from '../pages';
 import { DashboardLayout } from '../layouts';
 import { NotFound } from '../pages/404';
@@ -36,6 +37,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<Spin />}>
             <Watchlist />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'notifications',
+        element: (
+          <Suspense fallback={<Spin />}>
+            <AllNotification />
           </Suspense>
         ),
       },

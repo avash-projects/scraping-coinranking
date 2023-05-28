@@ -13,7 +13,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import DateInfo from './components/DateInfo';
 import { useFetchHistory } from './hooks/useFetchHistory';
 import Notification from './components/Notification';
-import { useFetchNotification } from './hooks/useFetchNotification';
 import { useFetchUnread } from './hooks/useFetchUnread';
 
 const { Header, Sider, Content } = Layout;
@@ -21,7 +20,6 @@ const { Header, Sider, Content } = Layout;
 const DashboardLayout = () => {
   const { history, isLoadingHistory } = useFetchHistory();
   const { notifications, unreadCount } = useFetchUnread();
-  console.log("not", notifications)
   const queryClient = useQueryClient();
   const location = useLocation();
   const currentPath = location.pathname.split('/')[1] ? location.pathname.split('/')[1] : 'home';

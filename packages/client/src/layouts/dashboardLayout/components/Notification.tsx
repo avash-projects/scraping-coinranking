@@ -1,8 +1,9 @@
 import { BellTwoTone } from "@ant-design/icons";
-import { Badge, Button, Drawer, List, Typography } from "antd";
+import { Badge, Button, Divider, Drawer, List, Typography } from "antd";
 import { useState } from "react";
 import { useMarkAllRead } from "../hooks/useMarkAllRead";
 import { getLocalDateTime } from "../../../libs/date";
+import { useNavigate } from "react-router-dom";
 
 interface NotificationItem {
   createdAt: string;
@@ -16,12 +17,19 @@ interface NotificationProps {
 }
 
 const Notification = ({ notifications, unreadCount }: NotificationProps) => {
+  const navigate = useNavigate();
   const markAllRead = useMarkAllRead()
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   const handleMarkAll = () => {
     markAllRead.mutate();
     setNotificationsOpen(false);
+  }
+
+  const handleViewAll = () => {
+    navigate('/notifications');
+    setNotificationsOpen(false);
+    return 1;
   }
 
   return (
@@ -52,7 +60,7 @@ const Notification = ({ notifications, unreadCount }: NotificationProps) => {
             <Button
               type="link"
               onClick={handleMarkAll}
-              disabled={!notifications.length}
+              disabled={!notifications?.length}
             >
               Mark all as read
             </Button>
@@ -60,7 +68,7 @@ const Notification = ({ notifications, unreadCount }: NotificationProps) => {
         )}
       >
         <List
-          dataSource={notifications}
+          dataSource={notifications?.slice(0, 10)}
           renderItem={(item) => {
             return (
               <List.Item>
@@ -77,6 +85,15 @@ const Notification = ({ notifications, unreadCount }: NotificationProps) => {
             );
           }}
         ></List>
+
+        <Divider />
+        <Button
+          type="default"
+          onClick={handleViewAll}
+          disabled={!notifications?.length}
+        >
+          View all notifications
+        </ Button>
       </Drawer>
     </>
   );
