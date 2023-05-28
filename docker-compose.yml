@@ -1,0 +1,59 @@
+version: '3.8'
+services:
+  mongo_scraper:
+    image: mongo
+    container_name: mongo_scraper
+    restart: always
+    # incase if you want to explore db with a local client or for some other reasons 
+    # ports:                    
+    #   - 27017:27017
+    expose:
+      - 27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: pass123
+    volumes:
+      - ./mongo-dev-data:/data/db
+    networks:
+      - scraper_nw
+  
+  scraper_server:
+    depends_on:
+      - mongo_scraper
+    container_name: scraper_server
+    build:
+      context: ./packages/server
+      dockerfile: Dockerfile
+    environment:
+      - PORT=3030
+      - SCRAPE_SITE_URL=https://coinranking.com
+      - PAGES_TO_SCRAPE=5
+      - MONGODB_URI=mongodb://root:pass123@mongo_scraper:27017/coinscrape?authSource=admin
+    ports:
+      - 3030:3030 #incase like above because also react needs
+    expose:
+      - 3030
+    networks:
+      - scraper_nw
+  
+  scraper_client:
+    depends_on:
+      - scraper_server
+    container_name: scraper_client
+    build:
+      context: ./packages/client
+      dockerfile: Dockerfile
+    environment:
+      - VITE_API_URL="http://localhost:3030"
+      - VITE_WS_URL="http://localhost:3030"
+    ports:
+     - 5173:5173
+    expose:
+      - 5173
+    networks:
+      - scraper_nw
+  
+networks:
+  scraper_nw:
+    driver: bridge
+

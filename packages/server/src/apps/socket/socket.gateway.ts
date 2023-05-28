@@ -1,5 +1,4 @@
 import {
-  // SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';

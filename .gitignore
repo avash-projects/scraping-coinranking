@@ -2,3 +2,4 @@ node_modules
 packages/server/node_modules
 packages/client/node_modules
 yarn-error.log
+mongo-dev-data
