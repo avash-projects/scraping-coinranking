@@ -11,20 +11,21 @@ import menuItems from './menu';
 import ScrapingStatus from './components/ScrapingStatus';
 import { useQueryClient } from '@tanstack/react-query';
 import DateInfo from './components/DateInfo';
+import { useFetchHistory } from './hooks/useFetchHistory';
+import Notification from './components/Notification';
+import { useFetchNotification } from './hooks/useFetchNotification';
+import { useFetchUnread } from './hooks/useFetchUnread';
 
 const { Header, Sider, Content } = Layout;
 
-interface ScrapeHistory {
-  date: string;
-  totalDocuments: number;
-}
-
 const DashboardLayout = () => {
+  const { history, isLoadingHistory } = useFetchHistory();
+  const { notifications, unreadCount } = useFetchUnread();
+  console.log("not", notifications)
   const queryClient = useQueryClient();
   const location = useLocation();
   const currentPath = location.pathname.split('/')[1] ? location.pathname.split('/')[1] : 'home';
   const [collapsed, setCollapsed] = useState(false);
-  const [scrapeHistory, setScrapeHistory] = useState<ScrapeHistory | null>(null);
   const {
     token: { colorBgContainer },
   } = theme.useToken();
@@ -41,19 +42,24 @@ const DashboardLayout = () => {
     function startScrapingEvent() {
       updateScrapingStatus(true);
     }
-    function endScrapingEvent(payload: ScrapeHistory) {
-      setScrapeHistory(payload)
+    function endScrapingEvent() {
       updateScrapingStatus(false);
       queryClient.invalidateQueries({ queryKey: ['coins'] })
       queryClient.invalidateQueries({ queryKey: ['history'] })
     }
 
+    function notificationEvent() {
+      queryClient.invalidateQueries({ queryKey: ['notification'] })
+    }
+
     socket?.on('scraping-started', startScrapingEvent);
     socket?.on('scraping-ended', endScrapingEvent);
+    socket?.on('price-notification', notificationEvent);
 
     return () => {
       socket?.off('scraping-started', startScrapingEvent);
       socket?.off('scraping-ended', endScrapingEvent);
+      socket?.off('price-notification', notificationEvent)
     }
   }, [socket, updateScrapingStatus, queryClient]);
   //cleanup
@@ -116,15 +122,19 @@ const DashboardLayout = () => {
             />
             <Row align="middle">
               {
-                isScraping && <ScrapingStatus sx={{ marginRight: '4rem' }} />
+                isScraping && <ScrapingStatus sx={{ marginRight: '2rem' }} />
               }
               {
-                !isScraping && scrapeHistory && <DateInfo
-                  sx={{ marginRight: '4rem', display: 'flex', flexDirection: 'column'  }}
-                  date={scrapeHistory?.date}
-                  totalDocs={scrapeHistory?.totalDocuments}
+                !isScraping && !isLoadingHistory && <DateInfo
+                  sx={{ marginRight: '2rem', display: 'flex', flexDirection: 'column' }}
+                  date={history?.scrapeDate}
+                  totalDocs={history?.totalRecords}
                 />
               }
+              <Notification 
+                notifications={notifications}
+                unreadCount={unreadCount}
+              />
               <Link to="/login">
                 <LogoutOutlined
                   onClick={logoutUser}

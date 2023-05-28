@@ -17,7 +17,11 @@ export class SocketGateway {
     this.server.emit('scraping-started', new Date());
   }
 
-  endScraping(totalDocuments: number): void {
-    this.server.emit('scraping-ended', { date: new Date(), totalDocuments });
+  endScraping(): void {
+    this.server.emit('scraping-ended', new Date());
+  }
+
+  priceNotification(): void {
+    this.server.emit('price-notification', new Date());
   }
 }

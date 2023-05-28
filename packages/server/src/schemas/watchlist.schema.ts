@@ -5,13 +5,19 @@ export type WatchlistDocument = HydratedDocument<Watchlist>;
 
 @Schema()
 export class Watchlist {
-  @Prop()
+  @Prop({
+    required: true
+  })
   symbol: string;
 
-  @Prop()
+  @Prop({
+    required: true
+  })
   min_price: number;
 
-  @Prop()
+  @Prop({
+    required: true
+  })
   max_price: number;
 
 }

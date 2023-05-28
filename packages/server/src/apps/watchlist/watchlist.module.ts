@@ -7,6 +7,7 @@ import { WatchlistSchema } from 'src/schemas/watchlist.schema';
 @Module({
   imports: [MongooseModule.forFeature([{ name: 'Watchlist', schema: WatchlistSchema }])],
   providers: [WatchlistService],
-  controllers: [WatchlistController]
+  controllers: [WatchlistController],
+  exports: [WatchlistService]
 })
 export class WatchlistModule { }

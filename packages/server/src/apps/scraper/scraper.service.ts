@@ -6,13 +6,19 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { SocketGateway } from '../socket/socket.gateway';
 import { Coin } from '../../schemas/coin.schema';
 import { CoinService } from '../coin/coin.service';
+import { HistoryService } from '../history/history.service';
+import { WatchlistService } from '../watchlist/watchlist.service';
+import { NotificationService } from '../notification/notification.service';
 @Injectable()
 export class ScraperService {
   constructor(
     private readonly httpService: HttpService,
     private readonly cheerioService: CheerioService,
     private readonly socketGateway: SocketGateway,
+    private readonly historyService: HistoryService,
     private readonly coinService: CoinService,
+    private readonly watchlistService: WatchlistService,
+    private readonly notificationService: NotificationService
   ) { }
 
   private scrapeConfig = parseInt(process.env.PAGES_TO_SCRAPE);
@@ -24,7 +30,12 @@ export class ScraperService {
     const { scrapedData } = await this.scrape();
     await this.coinService.deleteAll();
     await this.coinService.bulkInsert(scrapedData);
-    this.socketGateway.endScraping(scrapedData.length);
+    await this.historyService.add({
+      scrapeDate: new Date(),
+      totalRecords: scrapedData.length
+    })
+    this.socketGateway.endScraping();
+    this.priceCompare(scrapedData)
   }
 
   async scrape(): Promise<{
@@ -55,5 +66,35 @@ export class ScraperService {
     }
 
     return { lastPage, scrapedPages: pagesToScrape, scrapedData: allData };
+  }
+
+  async priceCompare(
+    coins: Coin[]
+  ) {
+    const watchlistData = await this.watchlistService.getAll();
+    const watchlistPrice = coins.filter(coin => watchlistData.some(item => item.symbol === coin.symbol));
+    const cleanPrice = watchlistPrice.map(coin => ({
+      ...coin,
+      price: parseFloat(coin.price.replace(/[$,]/g, ""))
+    }));
+    const notification = cleanPrice.map(obj => {
+      const matchingObj = watchlistData
+        .find(item => item.symbol === obj.symbol);
+      if (matchingObj) {
+        const { min_price, max_price } = matchingObj;
+        const price = obj.price;
+        if (price < min_price || price > max_price) {
+          return ({
+            message: `${obj.symbol} is on the move, The price has changed by ${obj.change} in 24 hours to $${obj.price}.`,
+            isRead: false
+          })
+        }
+      }
+      return;
+    }).filter(obj => obj);
+    if (notification.length !== 0) {
+      await this.notificationService.bulkInsert(notification)
+      this.socketGateway.priceNotification();
+    }
   }
 }

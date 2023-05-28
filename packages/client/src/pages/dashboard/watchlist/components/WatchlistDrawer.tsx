@@ -18,8 +18,8 @@ const WatchlistDrawer = (
     enabled: isOpen
   });
   const watchlistMutation = useWatchlistMutation();
-  const selectOptions = coins?.filter(({ symbol: d1 }: Watchlist) => !watchlist.some(({ symbol: d2 }) => d1 === d2));
-  const validatePositiveNumber = (_: any, value: number, callback: (error?: string) => void) => {
+  const selectOptions = coins?.filter(({ symbol: d1 }: Watchlist) => !watchlist?.some(({ symbol: d2 }) => d1 === d2));
+  const validatePositiveNumber = (_: any, value: number) => {
     const numberValue = Number(value);
     if (isNaN(numberValue) || numberValue < 0) {
       return new Promise((_, reject) => reject('Value cannot be smaller than zero'));

@@ -9,6 +9,8 @@ import { CoinModule } from './apps/coin/coin.module';
 import { CoinService } from './apps/coin/coin.service';
 import { ScraperService } from './apps/scraper/scraper.service';
 import { WatchlistModule } from './apps/watchlist/watchlist.module';
+import { HistoryModule } from './apps/history/history.module';
+import { NotificationModule } from './apps/notification/notification.module';
 
 @Module({
   imports: [
@@ -19,6 +21,8 @@ import { WatchlistModule } from './apps/watchlist/watchlist.module';
     SocketModule,
     CoinModule,
     WatchlistModule,
+    HistoryModule,
+    NotificationModule
   ],
 })
 export class AppModule implements OnModuleInit {

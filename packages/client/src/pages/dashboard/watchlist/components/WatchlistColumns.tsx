@@ -35,11 +35,13 @@ const getWatchlistColumns = ({ handleDelete }: WatchlistColumnsProps): ColumnTyp
       title: 'Min Price',
       dataIndex: 'min_price',
       key: 'min_price',
+      render: text => <span>$ {text}</span>,
     },
     {
       title: 'Max Price',
       dataIndex: 'max_price',
       key: 'max_price',
+      render: text => <span>$ {text}</span>,
     },
     {
       title: 'Action',
