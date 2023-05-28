@@ -13,13 +13,11 @@ import { useQueryClient } from '@tanstack/react-query';
 import DateInfo from './components/DateInfo';
 import { useFetchHistory } from './hooks/useFetchHistory';
 import Notification from './components/Notification';
-import { useFetchUnread } from './hooks/useFetchUnread';
 
 const { Header, Sider, Content } = Layout;
 
 const DashboardLayout = () => {
   const { history, isLoadingHistory } = useFetchHistory();
-  const { notifications, unreadCount } = useFetchUnread();
   const queryClient = useQueryClient();
   const location = useLocation();
   const currentPath = location.pathname.split('/')[1] ? location.pathname.split('/')[1] : 'home';
@@ -48,6 +46,7 @@ const DashboardLayout = () => {
 
     function notificationEvent() {
       queryClient.invalidateQueries({ queryKey: ['notification'] })
+      queryClient.invalidateQueries({ queryKey: ['all-notification'] })
     }
 
     socket?.on('scraping-started', startScrapingEvent);
@@ -129,10 +128,7 @@ const DashboardLayout = () => {
                   totalDocs={history?.totalRecords}
                 />
               }
-              <Notification 
-                notifications={notifications}
-                unreadCount={unreadCount}
-              />
+              <Notification />
               <Link to="/login">
                 <LogoutOutlined
                   onClick={logoutUser}

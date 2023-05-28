@@ -12,6 +12,7 @@ export const useMarkAllRead = () => {
     mutationFn: markAllRead,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notification'] });
+      queryClient.invalidateQueries({ queryKey: ['all-notification'] });
       notify("Success.", 'success', 'top-right');
     },
     onError: () => {

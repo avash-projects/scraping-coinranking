@@ -1,7 +1,10 @@
 import { Table } from "antd"
 import { NotificationTableColumns } from "./NotificationColumns"
+import { useFetchNotification } from "../hooks/useFetchNotification"
 
 const NotificationsTable = () => {
+    const { notification, isLoadingNotification } = useFetchNotification()
+    
     return (
         <>
             <Table
@@ -10,8 +13,8 @@ const NotificationsTable = () => {
                 }}
                 size="middle"
                 style={{ width: '100%' }}
-                loading={false}
-                dataSource={[]}
+                loading={isLoadingNotification}
+                dataSource={notification}
                 columns={NotificationTableColumns}
             />
         </>

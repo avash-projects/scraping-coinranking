@@ -1,24 +1,16 @@
 import { BellTwoTone } from "@ant-design/icons";
-import { Badge, Button, Divider, Drawer, List, Typography } from "antd";
+import { Badge, Button, Divider, Drawer, List, Tag, Typography } from "antd";
 import { useState } from "react";
 import { useMarkAllRead } from "../hooks/useMarkAllRead";
 import { getLocalDateTime } from "../../../libs/date";
 import { useNavigate } from "react-router-dom";
+import { useFetchUnread } from "../hooks/useFetchUnread";
+import { NotificationItem } from "../../../types";
 
-interface NotificationItem {
-  createdAt: string;
-  isRead: boolean;
-  message: string;
-  updatedAt: string;
-}
-interface NotificationProps {
-  notifications: NotificationItem[]
-  unreadCount: number
-}
-
-const Notification = ({ notifications, unreadCount }: NotificationProps) => {
+const Notification = () => {
   const navigate = useNavigate();
-  const markAllRead = useMarkAllRead()
+  const markAllRead = useMarkAllRead();
+  const { notifications, unreadCount } = useFetchUnread();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   const handleMarkAll = () => {
@@ -29,7 +21,6 @@ const Notification = ({ notifications, unreadCount }: NotificationProps) => {
   const handleViewAll = () => {
     navigate('/notifications');
     setNotificationsOpen(false);
-    return 1;
   }
 
   return (
@@ -58,7 +49,7 @@ const Notification = ({ notifications, unreadCount }: NotificationProps) => {
         extra={(
           <>
             <Button
-              type="link"
+              type="primary"
               onClick={handleMarkAll}
               disabled={!notifications?.length}
             >
@@ -69,7 +60,7 @@ const Notification = ({ notifications, unreadCount }: NotificationProps) => {
       >
         <List
           dataSource={notifications?.slice(0, 10)}
-          renderItem={(item) => {
+          renderItem={(item: NotificationItem) => {
             return (
               <List.Item>
                 <span
@@ -78,7 +69,12 @@ const Notification = ({ notifications, unreadCount }: NotificationProps) => {
                     flexDirection: 'column'
                   }}
                 >
-                  <Typography.Text type="secondary">{getLocalDateTime(item.createdAt)}</Typography.Text>
+                  <Typography.Text type="secondary" style={{ display: "flex", justifyContent: "space-between" }}>
+                    {getLocalDateTime(item.createdAt)}
+                    {
+                      !item?.isRead && <Tag color="green">new</Tag>
+                    }
+                  </Typography.Text>
                   <Typography.Text>{item.message}</Typography.Text>
                 </span>
               </List.Item>
@@ -88,7 +84,8 @@ const Notification = ({ notifications, unreadCount }: NotificationProps) => {
 
         <Divider />
         <Button
-          type="default"
+          type="link"
+          size="large"
           onClick={handleViewAll}
           disabled={!notifications?.length}
         >

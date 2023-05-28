@@ -25,6 +25,7 @@ export interface Watchlist {
 export interface NotificationItem{
   message: string;
   createdAt: string;
+  isRead?: boolean;
 }
 
 export interface NotificationColumn {
