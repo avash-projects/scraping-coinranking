@@ -1,6 +1,4 @@
-# Project Title
-
-A brief description of the project and its purpose.
+# Scraping Coinranking
 
 ## Table of Contents
 
