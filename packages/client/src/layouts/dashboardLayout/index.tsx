@@ -97,7 +97,7 @@ const DashboardLayout = () => {
           />
         </div>
         <Menu
-          defaultSelectedKeys={[currentPath]}
+          selectedKeys={[currentPath]}
           items={menuItems}
           theme="dark"
           mode="inline"

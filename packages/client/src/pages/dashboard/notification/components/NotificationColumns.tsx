@@ -21,7 +21,6 @@ export const NotificationTableColumns: NotificationColumn[] = [
         },
     },
     {
-        title: 'Status',
         dataIndex: 'isRead',
         key: 'isRead',
         render: (_, record) => {

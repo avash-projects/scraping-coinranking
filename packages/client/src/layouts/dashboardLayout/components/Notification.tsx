@@ -49,6 +49,13 @@ const Notification = () => {
         extra={(
           <>
             <Button
+              type="link"
+              size="large"
+              onClick={handleViewAll}
+            >
+              View all notifications
+            </ Button>
+            <Button
               type="primary"
               onClick={handleMarkAll}
               disabled={!notifications?.length}
@@ -81,16 +88,6 @@ const Notification = () => {
             );
           }}
         ></List>
-
-        <Divider />
-        <Button
-          type="link"
-          size="large"
-          onClick={handleViewAll}
-          disabled={!notifications?.length}
-        >
-          View all notifications
-        </ Button>
       </Drawer>
     </>
   );

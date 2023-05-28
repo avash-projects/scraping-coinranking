@@ -1,16 +1,13 @@
 import { Button, Row, Typography } from "antd";
 import NotificationTable from "./components/NotificationsTable";
-import { useMarkAllRead } from "../../../layouts/dashboardLayout/hooks/useMarkAllRead";
-import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { LeftOutlined } from "@ant-design/icons";
 const AllNotification = () => {
-  const queryClient = useQueryClient();
-  const markAllRead = useMarkAllRead();
-
-  const handleMarkRead = () => {
-    markAllRead.mutate();
-    queryClient.invalidateQueries({queryKey: ['notification','all-notification']});
+  const navigate = useNavigate()
+  const handleHome = () => {
+    navigate("/home")
   }
-
+  
   return (
     <div
       style={{
@@ -20,10 +17,11 @@ const AllNotification = () => {
       <Row justify="space-between" align="middle">
         <Typography.Title level={4}>Notifications</Typography.Title>
         <Button
-          onClick={handleMarkRead}
-          type="primary"
+          onClick={handleHome}
+          type="link"
+          icon={(<LeftOutlined />)}
         >
-          Mark all as read
+          Return home
         </Button>
       </Row>
       <Row>

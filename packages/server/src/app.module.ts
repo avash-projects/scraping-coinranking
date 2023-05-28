@@ -30,13 +30,14 @@ export class AppModule implements OnModuleInit {
   constructor(
     private readonly coinService: CoinService,
     private readonly scraperService: ScraperService
-  ) {}
-  
+  ) { }
+
   async onModuleInit() {
     const coinData = await this.coinService.getAll()
     if (coinData.length === 0) {
+      console.log("#### STARTING FIRST SCRAPE ####")
       await this.scraperService.scrapingCron()
-      console.log("Initial fetch complete.")
+      console.log("### FIRST SCRAPE COMPLETE ###")
     }
   }
 }

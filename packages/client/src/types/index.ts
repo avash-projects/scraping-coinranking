@@ -29,7 +29,7 @@ export interface NotificationItem{
 }
 
 export interface NotificationColumn {
-  title: string;
+  title?: string;
   dataIndex: string;
   key: string;
   render?: (text: string, record: NotificationItem) => React.ReactNode;

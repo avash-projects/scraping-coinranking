@@ -12,6 +12,7 @@ export const useWatchlistDeletion = () => {
     mutationFn: (symbol: string) => deleteFromWatchList(symbol),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['watchlist'] })
+      notify("Deleted watchlist item.", 'success', 'top-right');
     },
     onError: () => {
       notify("Error deleting item.", 'error', 'top-right');

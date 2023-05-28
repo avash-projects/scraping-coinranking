@@ -9,6 +9,7 @@ import { CoinService } from '../coin/coin.service';
 import { HistoryService } from '../history/history.service';
 import { WatchlistService } from '../watchlist/watchlist.service';
 import { NotificationService } from '../notification/notification.service';
+
 @Injectable()
 export class ScraperService {
   constructor(
@@ -24,7 +25,7 @@ export class ScraperService {
   private scrapeConfig = parseInt(process.env.PAGES_TO_SCRAPE);
   private scrapeSite = process.env.SCRAPE_SITE_URL;
 
-  @Cron('0 */1 * * * *')
+  @Cron('*/5 * * * *') //every five minutes
   async scrapingCron() {
     this.socketGateway.startScraping();
     const { scrapedData } = await this.scrape();
@@ -72,29 +73,38 @@ export class ScraperService {
     coins: Coin[]
   ) {
     const watchlistData = await this.watchlistService.getAll();
+    //get price of coins in watchlist
     const watchlistPrice = coins.filter(coin => watchlistData.some(item => item.symbol === coin.symbol));
-    const cleanPrice = watchlistPrice.map(coin => ({
-      ...coin,
-      price: parseFloat(coin.price.replace(/[$,]/g, ""))
+    // check if any coins moved out of the price list
+    const outOfPricelist = watchlistData.filter(data => !watchlistPrice.some(item => item.symbol === data.symbol))
+    // preapre notifications for out of list coins
+    const outOfListNotification = outOfPricelist.map(d => ({
+      message: `Oops, looks like ${d.symbol} moved out of the price list.`,
+      isRead: false
+    }))
+    // clean price data
+    const cleanPrice = watchlistPrice.map(({ symbol, price, change, ...rest }) => ({
+      change,
+      symbol,
+      price: parseFloat(price.replace(/[$,]/g, ""))
     }));
-    const notification = cleanPrice.map(obj => {
-      const matchingObj = watchlistData
-        .find(item => item.symbol === obj.symbol);
-      if (matchingObj) {
-        const { min_price, max_price } = matchingObj;
-        const price = obj.price;
-        if (price < min_price || price > max_price) {
-          return ({
-            message: `${obj.symbol} is on the move, The price has changed by ${obj.change} in 24 hours to $${obj.price}.`,
-            isRead: false
-          })
+
+    const notification = cleanPrice
+      .filter(obj => {
+        const matchingObj = watchlistData.find(item => item.symbol === obj.symbol);
+        if (matchingObj) {
+          const { min_price, max_price } = matchingObj;
+          const price = obj.price;
+          return price < min_price || price > max_price;
         }
-      }
-      return;
-    }).filter(obj => obj);
-    if (notification.length !== 0) {
-      await this.notificationService.bulkInsert(notification)
-      this.socketGateway.priceNotification();
-    }
+        return false;
+      })
+      .map(obj => ({
+        message: `${obj.symbol} is on the move, The price has changed by ${obj.change} in 24 hours to $${obj.price}.`,
+        isRead: false
+      }));
+
+    await this.notificationService.bulkInsert([...notification, ...outOfListNotification])
+    this.socketGateway.priceNotification();
   }
 }
